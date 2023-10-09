@@ -16,7 +16,7 @@ int main()
     bzero((char *)&serv_addr, sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(5000);
+    serv_addr.sin_port = htons(7000);
     serv_addr.sin_addr.s_addr = INADDR_ANY;
 
     bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));

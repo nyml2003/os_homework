@@ -107,3 +107,5 @@ int main()
 这个程序展示了如何在 Linux 下使用管道进行进程间通信。
 
 ## 项目地址
+
+https://github.com/nyml2003/os_homework/tree/main/pipe
