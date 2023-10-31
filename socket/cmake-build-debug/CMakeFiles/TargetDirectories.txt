@@ -1,0 +1,3 @@
+D:/code/os/os_homework/socket/cmake-build-debug/CMakeFiles/socket.dir
+D:/code/os/os_homework/socket/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/code/os/os_homework/socket/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,5 @@
+D:/code/os/9/DynamicPartitionAllocation/out/build/x64-debug/CMakeFiles/edit_cache.dir
+D:/code/os/9/DynamicPartitionAllocation/out/build/x64-debug/CMakeFiles/rebuild_cache.dir
+D:/code/os/9/DynamicPartitionAllocation/out/build/x64-debug/DynamicPartitionAllocation/CMakeFiles/DynamicPartitionAllocation.dir
+D:/code/os/9/DynamicPartitionAllocation/out/build/x64-debug/DynamicPartitionAllocation/CMakeFiles/edit_cache.dir
+D:/code/os/9/DynamicPartitionAllocation/out/build/x64-debug/DynamicPartitionAllocation/CMakeFiles/rebuild_cache.dir
