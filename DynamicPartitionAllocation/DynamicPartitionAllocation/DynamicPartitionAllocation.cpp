@@ -3,7 +3,6 @@
 
 #include "DynamicPartitionAllocation.h"
 
-using namespace std;
 class DynamicPartitionAllocation
 {
 public:
@@ -17,9 +16,12 @@ public:
         return partitionAllocationInterface->recycle(freeBlockList, recycleBlock);
     }
     void showFreeBlockList() {
+        std::cout << "|" << "address" << "|" << "size" << "|" << std::endl;
+        std::cout << "|" << "-------" << "|" << "-------" << "|" << std::endl;
         for (int i = 0; i < freeBlockList.size(); i++) {
-            cout << "address:" << freeBlockList[i].getAddress() << " size:" << freeBlockList[i].getSize() << endl;
+            std::cout << "|" << freeBlockList[i].getAddress() << "|" << freeBlockList[i].getSize() << "|" << std::endl;
         }
+        std::cout << std::endl;
     }
     std::vector<Block> freeBlockList;
     PartitionAllocationInterface *partitionAllocationInterface;
@@ -37,18 +39,15 @@ void test1(DynamicPartitionAllocation* dpa){
     dpa->freeBlockList.push_back(block2);
     dpa->freeBlockList.push_back(block3);
     dpa->showFreeBlockList();
-    cout<<endl;
+    std::cout<<std::endl;
     for (int i = 0; i < sizeof(jobs) / sizeof(int); i++) {
         int address = dpa->allocate(jobs[i]);
-        cout<<"allocate job size:"<<jobs[i]<<endl;
+        std::cout<<"allocate job size:"<<jobs[i]<<std::endl;
         if (address == -1) {
-            cout << "allocate failed" << endl;
+            ;
         }
         else {
-            cout << "allocate success address:" << address << endl;
-            cout << "after allocate" << endl;
             dpa->showFreeBlockList();
-            cout<<endl;
         }
     }
 
@@ -65,55 +64,116 @@ void test2(DynamicPartitionAllocation* dpa){
             req,
             release
         } type;
-        int address;
+        int id;
     };
     Job job[]={
-            {300,Job::req, -1},
-            {100,Job::req, -1},
-            {300,Job::release,0},
-            {150,Job::req, -1},
-            {30,Job::req, -1},
-            {40,Job::req, -1},
-            {60,Job::req, -1},
+            {300,Job::req, 1},
+            {100,Job::req, 2},
+            {300,Job::release,1},
+            {150,Job::req, 3},
+            {30,Job::req, 4},
+            {40,Job::req, 5},
+            {60,Job::req, 6},
     };
+    Block store_address[10];
     for (int i=0; i<sizeof(job)/sizeof(Job); i++) {
         if (job[i].type == Job::req) {
+            std::cout << "分配作业 " << "大小为" << job[i].size << std::endl;
             int address = dpa->allocate(job[i].size);
-            cout<<"allocate job size:"<<job[i].size<<endl;
             if (address == -1) {
-                cout << "allocate failed" << endl;
+                ;
             }
             else {
-                cout << "allocate success address:" << address << endl;
-                cout << "after allocate" << endl;
+                store_address[job[i].id].setAddress(address).setSize(job[i].size);
                 dpa->showFreeBlockList();
-                cout<<endl;
             }
         }
         else if (job[i].type == Job::release) {
-            Block block;
-            block.setAddress(job[i].size).setSize(0);
-
-            int address = dpa->recycle(block);
-            cout<<"recycle job address:"<<job[i].size<<endl;
+            std::cout << "回收作业 "  << "大小为" << job[i].size << std::endl;
+            int address = dpa->recycle(store_address[job[i].id]);
             if (address == -1) {
-                cout << "recycle failed" << endl;
+                ;
             }
             else {
-                cout << "recycle success address:" << address << endl;
-                cout << "after recycle" << endl;
+                dpa->freeBlockList.push_back(store_address[job[i].id]);
+                //内部排序
+                std::sort(dpa->freeBlockList.begin(), dpa->freeBlockList.end(), [](Block a, Block b) {
+                    return a.getAddress() < b.getAddress();
+                });
                 dpa->showFreeBlockList();
-                cout<<endl;
             }
         }
     }
 }
+void test3(DynamicPartitionAllocation *dpa)
+{
+    dpa->partitionAllocationInterface->introduce();
+    Block block;
+    block.setAddress(0).setSize(55);
+    dpa->freeBlockList.push_back(block);
+    dpa->showFreeBlockList();
+    struct Job
+    {
+        int size;
+        enum Type
+        {
+            req,
+            release
+        } type;
+        int id;
+    };
+    Job job[] = {
+        {15, Job::req, 1},
+        {30, Job::req, 2},
+        {15,Job::release,1},
+        {8, Job::req, 3},
+        {6, Job::req, 4},
+    };
+    Block store_address[10];
+    for (int i = 0; i < sizeof(job) / sizeof(Job); i++)
+    {
+        if (job[i].type == Job::req)
+        {
+            std::cout << "分配作业 "
+                      << "大小为" << job[i].size << std::endl;
+            int address = dpa->allocate(job[i].size);
+            if (address == -1)
+            {
+                ;
+            }
+            else
+            {
+                store_address[job[i].id].setAddress(address).setSize(job[i].size);
+                dpa->showFreeBlockList();
+            }
+        }
+        else if (job[i].type == Job::release)
+        {
+            std::cout << "回收作业 "
+                      << "大小为" << job[i].size << std::endl;
+            int address = dpa->recycle(store_address[job[i].id]);
+            if (address == -1)
+            {
+                ;
+            }
+            else
+            {
+                dpa->freeBlockList.push_back(store_address[job[i].id]);
+                // 内部排序
+                std::sort(dpa->freeBlockList.begin(), dpa->freeBlockList.end(), [](Block a, Block b)
+                          { return a.getAddress() < b.getAddress(); });
+                dpa->showFreeBlockList();
+            }
+        }
+    }
+}
+
 int main()
 {
-    DynamicPartitionAllocation* dpa = new DynamicPartitionAllocation(new BestFit());
-    test2(dpa);
-    dpa = new DynamicPartitionAllocation(new FirstFit());
-    cout<<"-------------------------"<<endl;
-    test2(dpa);
+    //重定向输出
+    // DynamicPartitionAllocation* dpa1 = new DynamicPartitionAllocation(new FirstFit());
+    // test2(dpa1);
+    DynamicPartitionAllocation *dpa2 = new DynamicPartitionAllocation(new BestFit());
+    test3(dpa2);
 	return 0;
 }

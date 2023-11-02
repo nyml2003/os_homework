@@ -3,21 +3,25 @@
 class FirstFit :public PartitionAllocationInterface
 {
 public:
+    ~FirstFit() {
+        fclose(stdout);
+    }
     void introduce() {
-        std::cout << "FirstFit" << std::endl;
+        freopen("firstfit.md", "w", stdout);
+        std::cout << "首次适应法" << std::endl;
     }
 	int allocate(std::vector<Block>& freeBlockList, int jobSize) {
 		//分配算法，传入参数为空闲区队列，和新作业的大小,返回新地址，如果分配失败返回-1
 		for (int i = 0; i < freeBlockList.size(); i++) {
 			if (freeBlockList[i].getSize() >= jobSize) {
-				freeBlockList[i] = freeBlockList[i]
+                int newAddress = freeBlockList[i].getAddress();
+                freeBlockList[i] = freeBlockList[i]
 					.setAddress(
 						freeBlockList[i].getAddress() + jobSize
 					)
 					.setSize(
 						freeBlockList[i].getSize() - jobSize
 					);
-                int newAddress = freeBlockList[i].getAddress();
                 if (freeBlockList[i].getSize() == 0) {
                     freeBlockList.erase(freeBlockList.begin() + i);
                 }
@@ -29,7 +33,7 @@ public:
 	int recycle(std::vector<Block>& freeBlockList, Block recycleBlock) {
 		int index = 0;
 		for (; index < freeBlockList.size(); index++) {
-			if (freeBlockList[index].getAddress() < recycleBlock.getAddress()) {
+			if (freeBlockList[index].getAddress() > recycleBlock.getAddress()) {
 				break;
 			}
 		}
@@ -51,18 +55,20 @@ public:
                     freeBlockList.erase(freeBlockList.begin() + nextIndex);
                 }
             }
+            return 1;
 		}
-        if (nextIndex != freeBlockList.size()) {
-            if (freeBlockList[nextIndex].getAddress() == recycleBlock.getEndAddress()) {
-                freeBlockList[nextIndex] = freeBlockList[nextIndex]
-                    .setAddress(
-                        freeBlockList[nextIndex].getAddress() - recycleBlock.getSize()
-                    )
-                    .setSize(
-                        freeBlockList[nextIndex].getSize() + recycleBlock.getSize()
-                    );
-            }
+        else if (nextIndex != freeBlockList.size()) {
+                if (freeBlockList[nextIndex].getAddress() == recycleBlock.getEndAddress()) {
+                    freeBlockList[nextIndex] = freeBlockList[nextIndex]
+                        .setAddress(
+                            freeBlockList[nextIndex].getAddress() - recycleBlock.getSize()
+                        )
+                        .setSize(
+                            freeBlockList[nextIndex].getSize() + recycleBlock.getSize()
+                        );
+                }
+            return 1;
         }
-        return 1;
-	}
+        return 0;
+    }
 };
